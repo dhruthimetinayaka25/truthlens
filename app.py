@@ -17,7 +17,7 @@ st.set_page_config(
 
 CUSTOM_CSS = """
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap');
 
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
@@ -165,7 +165,7 @@ if "Image" in module_choice:
             target_bytes = uploaded_file.read()
             try:
                 target_img = Image.open(io.BytesIO(target_bytes)).convert("RGB")
-            except Exception as e:
+            except Exception:
                 st.error("Invalid image encoding. Please upload a standard JPG or PNG file.")
             
     with tab_demo:
@@ -173,7 +173,6 @@ if "Image" in module_choice:
         d_col1, d_col2 = st.columns(2)
         with d_col1:
             if st.button("Generate Synthetic Benchmark (Periodic Artifacts)", use_container_width=True):
-                # Generates synthetic frequency grid patterns locally in memory
                 x = np.linspace(-10, 10, 384)
                 y = np.linspace(-10, 10, 384)
                 xx, yy = np.meshgrid(x, y)
@@ -186,7 +185,6 @@ if "Image" in module_choice:
 
         with d_col2:
             if st.button("Generate Authentic Camera Simulation (Smooth Gradient)", use_container_width=True):
-                # Generates continuous organic photographic gradient locally
                 x = np.linspace(0, 255, 384)
                 grad = np.tile(x, (384, 1)).astype(np.uint8)
                 img = Image.fromarray(grad).convert("RGB")
@@ -198,7 +196,7 @@ if "Image" in module_choice:
                 target_img = img
 
     if target_img is not None and target_bytes is not None:
-    sha256_hash = hashlib.sha256(target_bytes).hexdigest()
+        sha256_hash = hashlib.sha256(target_bytes).hexdigest()
         
         st.markdown(f"""
         <div class="hud-card" style="margin-top:15px;">
@@ -318,7 +316,7 @@ elif "Video" in module_choice:
     
     if uploaded_video:
         raw_v_bytes = uploaded_video.read()
-  v_sha256 = hashlib.sha256(raw_v_bytes).hexdigest()
+        v_sha256 = hashlib.sha256(raw_v_bytes).hexdigest()
         
         st.markdown(f"""
         <div class="hud-card">
@@ -368,7 +366,7 @@ else:
     
     if uploaded_pdf:
         raw_pdf_bytes = uploaded_pdf.read()
-       pdf_sha256 = hashlib.sha256(raw_pdf_bytes).hexdigest()
+        pdf_sha256 = hashlib.sha256(raw_pdf_bytes).hexdigest()
         
         st.markdown(f"""
         <div class="hud-card">
