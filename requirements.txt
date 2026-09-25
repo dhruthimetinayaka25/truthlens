@@ -5,3 +5,4 @@ transformers
 pillow
 pymupdf
 numpy
+opencv-python-headless
