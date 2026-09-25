@@ -229,10 +229,13 @@ if "Image" in module_choice:
 
         # MULTI-FACTOR RADAR & VERDICT
         st.markdown("---")
-        res_col1, res_col2 = st.columns([1, 1.4])
+        res_col1, res_col2 = st.columns([1.2, 1.2])
         
         with res_col1:
+            fake_percent = ml_res["fake_probability"] * 100
+            real_percent = (1.0 - ml_res["fake_probability"]) * 100
             is_fake = ml_res["fake_probability"] > 0.55
+            
             badge_html = f'<span class="badge-danger">CRITICAL: {ml_res["verdict"].upper()}</span>' if is_fake else f'<span class="badge-safe">SECURE: {ml_res["verdict"].upper()}</span>'
             
             st.markdown(f"""
@@ -241,14 +244,23 @@ if "Image" in module_choice:
                     <span style="font-weight:600;">Neural Forensic Diagnosis</span>
                     {badge_html}
                 </div>
-                <div class="hud-sub">Synthetic Probability</div>
-                <div class="hud-metric">{ml_res["fake_probability"]*100:.2f}%</div>
-                <div style="font-size:0.8rem; color:#94a3b8; margin-top:8px;">Model Confidence: <b>{ml_res["confidence"]:.2f}%</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <span style="color:#f87171; font-weight:700; font-family:'JetBrains Mono'; font-size:1.1rem;">Fake / Manipulated: {fake_percent:.2f}%</span>
+                    <span style="color:#4ade80; font-weight:700; font-family:'JetBrains Mono'; font-size:1.1rem;">Real / Authentic: {real_percent:.2f}%</span>
+                </div>
             </div>
             """, unsafe_allow_html=True)
+
+            # Dual Visual Meter
+            st.caption("🔴 Manipulation Confidence vs 🟢 Authenticity Confidence")
+            st.progress(ml_res["fake_probability"])
+            
+            m1, m2 = st.columns(2)
+            m1.metric(label="Synthetic Probability", value=f"{fake_percent:.2f}%")
+            m2.metric(label="Authenticity Probability", value=f"{real_percent:.2f}%")
             
             st.markdown("""
-            <div class="pipeline-step">
+            <div class="pipeline-step" style="margin-top:10px;">
                 <b>Analytical Rationale:</b><br>
                 <span style="font-size:0.85rem; color:#94a3b8;">
                 High-frequency spectral clustering in the 2D-FFT domain paired with anomalous ELA error distributions indicates synthetic upsampling typical of deep convolutional and generative diffusion networks.
