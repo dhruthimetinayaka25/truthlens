@@ -2,8 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import io
-import requests
-from PIL import Image
+from PIL import Image, ImageDraw
 from detectors.image_detector import ImageForensicDetector
 from detectors.pdf_detector import PDFDocAnalyzer
 from detectors.video_detector import VideoForensicDetector
@@ -17,7 +16,7 @@ st.set_page_config(
 
 CUSTOM_CSS = """
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap');
 
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
@@ -124,7 +123,7 @@ with st.sidebar:
     st.divider()
     st.caption("B.Tech Capstone Project • Final Year Engineering Defense")
 
-# TOP STATUS RIBBON (ELIMINATES EMPTY VOID)
+# TOP STATUS RIBBON
 st.markdown("""
 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b; padding-bottom:10px; margin-bottom:20px;">
     <div>
@@ -137,7 +136,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# LIVE SYSTEM TELEMETRY HUD (Visible Immediately)
+# LIVE SYSTEM TELEMETRY HUD
 col_h1, col_h2, col_h3, col_h4 = st.columns(4)
 with col_h1:
     st.markdown('<div class="hud-card"><div class="hud-sub">Spatial Model</div><div class="hud-metric">ViT-B/16</div><div style="font-size:0.75rem; color:#64748b;">Fine-tuned DeiT Checkpoint</div></div>', unsafe_allow_html=True)
@@ -163,24 +162,41 @@ if "Image" in module_choice:
         uploaded_file = st.file_uploader("Select target asset for forensic decomposition", type=["jpg", "jpeg", "png"])
         if uploaded_file:
             target_bytes = uploaded_file.read()
-            target_img = Image.open(io.BytesIO(target_bytes))
+            try:
+                target_img = Image.open(io.BytesIO(target_bytes)).convert("RGB")
+            except Exception as e:
+                st.error("Invalid image encoding. Please upload a standard JPG or PNG file.")
             
     with tab_demo:
-        st.caption("Click any preset sample to run the pipeline without searching for external files:")
+        st.caption("Click any preset sample to run offline local benchmarks instantly:")
         d_col1, d_col2 = st.columns(2)
         with d_col1:
-            if st.button("Load Synthesized AI Sample (Latent Face)", use_container_width=True):
-                # Generative sample from standard benchmark
-                res = requests.get("https://raw.githubusercontent.com/NVlabs/stylegan/master/docs/stylegan-teaser.png")
-                target_bytes = res.content
-                target_img = Image.open(io.BytesIO(target_bytes))
-        with d_col2:
-            if st.button("Load Authentic Uncompressed Sample", use_container_width=True):
-                res = requests.get("https://raw.githubusercontent.com/python-pillow/Pillow/master/Tests/images/hopper.ppm")
-                target_bytes = res.content
-                target_img = Image.open(io.BytesIO(target_bytes))
+            if st.button("Generate Synthetic Benchmark (Periodic Artifacts)", use_container_width=True):
+                # Generates synthetic frequency grid patterns locally in memory
+                x = np.linspace(-10, 10, 384)
+                y = np.linspace(-10, 10, 384)
+                xx, yy = np.meshgrid(x, y)
+                synth = (np.sin(xx * 3.5) * np.cos(yy * 3.5) * 127 + 128).astype(np.uint8)
+                img = Image.fromarray(synth).convert("RGB")
+                buf = io.BytesIO()
+                img.save(buf, format="PNG")
+                target_bytes = buf.getvalue()
+                target_img = img
 
-    if target_img is not None:
+        with d_col2:
+            if st.button("Generate Authentic Camera Simulation (Smooth Gradient)", use_container_width=True):
+                # Generates continuous organic photographic gradient locally
+                x = np.linspace(0, 255, 384)
+                grad = np.tile(x, (384, 1)).astype(np.uint8)
+                img = Image.fromarray(grad).convert("RGB")
+                draw = ImageDraw.Draw(img)
+                draw.ellipse((96, 96, 288, 288), fill=(200, 180, 140), outline=(255, 255, 255))
+                buf = io.BytesIO()
+                img.save(buf, format="JPEG", quality=95)
+                target_bytes = buf.getvalue()
+                target_img = img
+
+    if target_img is not None and target_bytes is not None:
         sha256_hash = img_detector.compute_sha256(target_bytes)
         
         st.markdown(f"""
@@ -200,7 +216,7 @@ if "Image" in module_choice:
         with col1:
             st.markdown("##### 📌 Ingested Spatial Frame")
             st.image(target_img, use_container_width=True)
-            st.caption(f"Dimensions: {target_img.size[0]}x{target_img.size[1]}px | Format: {target_img.format or 'RGB'}")
+            st.caption(f"Dimensions: {target_img.size[0]}x{target_img.size[1]}px | Format: RGB (Normalized)")
             
         with col2:
             st.markdown("##### 🔲 Compression Residuals (ELA)")
@@ -260,7 +276,7 @@ if "Image" in module_choice:
             st.plotly_chart(fig, use_container_width=True)
 
     else:
-        # ARCHITECTURAL HUD (WHEN NO ASSET IS LOADED)
+        # ARCHITECTURAL HUD
         st.markdown("---")
         st.markdown("#### 🔬 Forensic Engine Pipeline Architecture")
         m_col1, m_col2, m_col3 = st.columns(3)
