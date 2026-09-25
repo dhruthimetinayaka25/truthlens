@@ -1,4 +1,5 @@
 import streamlit as st
+import hashlib
 import plotly.graph_objects as go
 import numpy as np
 import io
