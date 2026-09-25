@@ -198,7 +198,7 @@ if "Image" in module_choice:
                 target_img = img
 
     if target_img is not None and target_bytes is not None:
-        sha256_hash = img_detector.compute_sha256(target_bytes)
+    sha256_hash = hashlib.sha256(target_bytes).hexdigest()
         
         st.markdown(f"""
         <div class="hud-card" style="margin-top:15px;">
@@ -318,7 +318,7 @@ elif "Video" in module_choice:
     
     if uploaded_video:
         raw_v_bytes = uploaded_video.read()
-        v_sha256 = img_detector.compute_sha256(raw_v_bytes)
+  v_sha256 = hashlib.sha256(raw_v_bytes).hexdigest()
         
         st.markdown(f"""
         <div class="hud-card">
@@ -368,7 +368,7 @@ else:
     
     if uploaded_pdf:
         raw_pdf_bytes = uploaded_pdf.read()
-        pdf_sha256 = img_detector.compute_sha256(raw_pdf_bytes)
+       pdf_sha256 = hashlib.sha256(raw_pdf_bytes).hexdigest()
         
         st.markdown(f"""
         <div class="hud-card">
